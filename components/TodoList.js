@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react';
 
 export default function TodoList({ initialTodos }) {
+  console.log(initialTodos);
   const [todos, setTodos] = useState(initialTodos || []);
   const [newTodo, setNewTodo] = useState("");
   const [isEditing, setIsEditing] = useState({});

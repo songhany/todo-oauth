@@ -23,7 +23,7 @@ export default function Home() {
         {status === 'authenticated' ? (
           <>
             <p>Welcome, {session.user.name}!</p>
-            <TodoList />
+            <TodoList initialTodos={session.user.todolist}/>
             <button className='text-blue-400' onClick={handleSignOut}>
               Sign Out
             </button>
