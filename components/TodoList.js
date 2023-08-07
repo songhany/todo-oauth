@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react';
 
-export default function TodoList() {
-  const [todos, setTodos] = useState([]);
+export default function TodoList({ initialTodos }) {
+  const [todos, setTodos] = useState(initialTodos || []);
   const [newTodo, setNewTodo] = useState("");
   const [isEditing, setIsEditing] = useState({});
   const [titleBeforeEdit, setTitleBeforeEdit] = useState("");  // store curTitle before Editing, so we can click C
@@ -12,36 +13,73 @@ export default function TodoList() {
   //     .then((todos) => setTodos(todos));
   // }, []);
 
-  function addHandler(e) {
+  const { data: session } = useSession(); // Use NextAuth session
+
+  async function addHandler(e) {
     e.preventDefault();
 
-    if (todos.length === 0) {
-      const fristTodo = {
-        userId: 1,
-        id: 1,
-        title: newTodo,
-        completed: false,
-      }
-      const newTodos = [...todos, fristTodo];
-      setTodos(newTodos);
-    
-    } else {
-      setTodos((prev) => {
-        return [...prev, {
-            userId: prev[prev.length - 1].userId,
-            id: prev[prev.length - 1].id + 1,
-            title: newTodo,
-            completed: false
-          }
-        ];
+    const newTodoItem = {
+      userId: session.user.id, // Assuming you have access to the user's ID in session
+      id: todos.length > 0 ? todos[todos.length - 1].id + 1 : 1,
+      title: newTodo,
+      completed: false,
+    };
+
+    // Update local state
+    setTodos((prev) => [...prev, newTodoItem]);
+    setNewTodo('');
+
+    // Add todo to the user's todolist in the database
+    try {
+      const response = await fetch('/api/add-todo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          todoItem: newTodoItem,
+        }),
       });
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('Todo item added to the user\'s todolist in the database');
+      } else {
+        console.error('Failed to update the user\'s todolist in the database');
+      }
+    } catch (error) {
+      console.error('Error updating todolist in the database:', error);
     }
   }
 
-  function deleteHandler(todoId) {
+  async function deleteHandler(todoId) {
     setTodos((prev) => {
       return prev.filter((todo) => todo.id !== todoId);
     });
+
+    // Delete the todo from the user's todolist in the database
+    try {
+      const response = await fetch('/api/delete-todo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          todoId: todoId,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('Todo item deleted from the user\'s todolist in the database');
+      } else {
+        console.error('Failed to delete the todo from the user\'s todolist in the database');
+      }
+    } catch (error) {
+      console.error('Error deleting todo from the database:', error);
+    }
   }
 
   function editHandler(todoId, curTodoTitle) {
@@ -49,7 +87,7 @@ export default function TodoList() {
     setIsEditing((prevIsEditing) => ({ ...prevIsEditing, [todoId]: true }));
   }
 
-  function saveHandler(todoId, newTitle) {
+  async function saveHandler(todoId, newTitle) {
     setTodos((todos) =>
       todos.map((todo) => {
         if (todo.id === todoId) {
@@ -59,6 +97,30 @@ export default function TodoList() {
       })
     );
     setIsEditing((prevIsEditing) => ({ ...prevIsEditing, [todoId]: false }));
+
+    // Save the todo title in the database
+    try {
+      const response = await fetch('/api/save-todo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          todoId: todoId,
+          newTitle: newTitle,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('Todo item updated in the database');
+      } else {
+        console.error('Failed to update the todo item in the database');
+      }
+    } catch (error) {
+      console.error('Error updating todo in the database:', error);
+    }
   }
 
   function cancelHandler(todoId) {
@@ -73,7 +135,7 @@ export default function TodoList() {
     setIsEditing((prevIsEditing) => ({ ...prevIsEditing, [todoId]: false }));
   }
 
-  function toggleHandler(todoId) {
+  async function toggleHandler(todoId) {
     setTodos((todos) =>
       todos.map((todo) => {
         if (todo.id === todoId) {
@@ -82,6 +144,29 @@ export default function TodoList() {
         return todo;
       })
     );
+
+    // Toggle the todo completion status in the database
+    try {
+      const response = await fetch('/api/toggle-todo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          todoId: todoId,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('Todo item completion status updated in the database');
+      } else {
+        console.error('Failed to update the todo item completion status in the database');
+      }
+    } catch (error) {
+      console.error('Error updating todo completion status in the database:', error);
+    }
   }
 
   // console.log(todos);
