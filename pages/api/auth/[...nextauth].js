@@ -14,10 +14,10 @@ export const authOptions = {
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET
     }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET,
-    }),
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_ID,
+    //   clientSecret: process.env.GOOGLE_SECRET,
+    // }),
     // ...add more providers here
   ],
 
@@ -25,7 +25,7 @@ export const authOptions = {
 
   },
   async signIn({profile}) {
-    
+
   }
   // Add any other global configurations here
 };

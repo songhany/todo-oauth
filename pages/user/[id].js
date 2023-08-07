@@ -24,7 +24,7 @@ const user = () => {
       {session.user ? (
         <>
           <p>Name: {session.user.name}</p>
-          {/* <p>Email: {session.user.email}</p> */}
+          <p>Email: {session.user.email}</p>
         </>
       ) : (
         <p>User data not available</p>

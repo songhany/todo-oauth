@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import React from 'react'
 import { useSession } from 'next-auth/react';
-import { data } from 'autoprefixer';
 
 export default function Header() {
   const { data: session } = useSession();
