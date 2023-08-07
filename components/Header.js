@@ -8,11 +8,11 @@ export default function Header() {
 
   return (
     <div className='header'>
-      <Link href="/" className='block mt-4 lg:inline-block lg:mt-0 text-blue-400 hover:text-blue-800 mr-4'>
+      <Link href="/">
         Home
       </Link>
       {session && (  // the "User" link will only be displayed when the user is signed in. 
-        <Link href={`/user/${session.user.name}`} className='block mt-4 lg:inline-block lg:mt-0 text-blue-400 hover:text-blue-800 mr-4'>
+        <Link href={`/user/${session.user.name}`}>
           User
         </Link>
       )}
